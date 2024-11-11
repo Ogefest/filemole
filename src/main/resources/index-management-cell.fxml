@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="resultCell" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="90.0" prefWidth="456.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label fx:id="indexName" layoutX="14.0" layoutY="21.0" text="Label" AnchorPane.leftAnchor="14.0">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <Button fx:id="btnRemoveIndex" layoutX="290.0" layoutY="19.0" mnemonicParsing="false" text="Remove" AnchorPane.rightAnchor="14.0" />
+      <Label fx:id="labelSize" layoutX="14.0" layoutY="43.0" text="Label" />
+      <Label fx:id="labelCount" layoutX="14.0" layoutY="60.0" text="Label" />
+   </children>
+</AnchorPane>
