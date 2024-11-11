@@ -4,31 +4,29 @@ import com.lukaszgajos.filemole.domain.entity.Index;
 import com.lukaszgajos.filemole.domain.entity.IndexDefinition;
 import com.lukaszgajos.filemole.domain.entity.Item;
 import com.lukaszgajos.filemole.domain.entity.SearchConfiguration;
-import com.lukaszgajos.filemole.domain.entity.search.Path;
+import com.lukaszgajos.filemole.domain.entity.search.*;
 import com.lukaszgajos.filemole.domain.process.Worker;
 import com.lukaszgajos.filemole.domain.service.DatabaseService;
 import com.lukaszgajos.filemole.domain.service.IndexService;
 import com.lukaszgajos.filemole.domain.service.SearchService;
 import com.lukaszgajos.filemole.domain.service.WorkerService;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.DirectoryChooser;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class MainController {
     @FXML
@@ -54,6 +52,29 @@ public class MainController {
 
     @FXML
     private TextField inputSearch;
+
+    @FXML
+    private ToggleButton btnAdvancedFilters;
+    @FXML
+    private TextField inputExcludePhrase;
+
+    @FXML
+    private TextField inputExtensions;
+
+    @FXML
+    private TextField inputMaxSize;
+
+    @FXML
+    private TextField inputMinSize;
+
+    @FXML
+    private AnchorPane paneAdvancedFilters;
+
+    @FXML
+    private AnchorPane paneSearchResult;
+
+    @FXML
+    private ComboBox<String> comboSize;
 
     private LocalDateTime lastSearch = LocalDateTime.now();
 
@@ -83,9 +104,11 @@ public class MainController {
             search();
         });
 
-        inputSearch.textProperty().addListener((observableValue, s, t1) -> {
-            search();
-        });
+        inputSearch.textProperty().addListener(this::onSearchInputChange);
+        inputExcludePhrase.textProperty().addListener(this::onSearchInputChange);
+        inputMaxSize.textProperty().addListener(this::onSearchInputChange);
+        inputMinSize.textProperty().addListener(this::onSearchInputChange);
+        inputExtensions.textProperty().addListener(this::onSearchInputChange);
 
         btnAddIndex.setOnAction(actionEvent -> {
             String startPath = inputStartPath.getText();
@@ -140,7 +163,35 @@ public class MainController {
             }
         });
 
+        paneAdvancedFilters.setVisible(false);
+        paneAdvancedFilters.setManaged(false);
+        AnchorPane.setTopAnchor(paneSearchResult, 60.0);
+        btnAdvancedFilters.setOnAction(actionEvent -> {
+            boolean isFiltersActive = btnAdvancedFilters.isSelected();
+            paneAdvancedFilters.setVisible(isFiltersActive);
+            paneAdvancedFilters.setManaged(isFiltersActive);
+            if (isFiltersActive) {
+                AnchorPane.setTopAnchor(paneSearchResult, 180.0);
+            } else {
+                AnchorPane.setTopAnchor(paneSearchResult, 60.0);
+                inputMaxSize.setText("");
+                inputMinSize.setText("");
+                inputExtensions.setText("");
+                inputExcludePhrase.setText("");
+            }
+        });
+        comboSize.getItems().addAll("B", "KB", "MB", "GB", "TB");
+        comboSize.setValue("MB");
 
+        Platform.runLater(() -> {
+            inputSearch.requestFocus();
+        });
+
+
+    }
+
+    private void onSearchInputChange(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
+        search();
     }
 
     private void search() {
@@ -152,18 +203,28 @@ public class MainController {
             searchResults.clear();
 
             SearchConfiguration sq = new SearchConfiguration();
-            String[] elems = search.split(" ");
-            for (String s : elems) {
-                if (!s.isEmpty()) {
-                    sq.addFilter(new Path(s));
-                }
+            sq.addFilter(new Path(search));
+            if (inputExcludePhrase.getText().length() > 0) {
+                sq.addFilter(new Exclude(inputExcludePhrase.getText()));
             }
+            if (inputMinSize.getText().length() > 0) {
+                sq.addFilter(new MinSize(inputMinSize.getText(), comboSize.getValue()));
+            }
+            if (inputMaxSize.getText().length() > 0) {
+                sq.addFilter(new MaxSize(inputMaxSize.getText(), comboSize.getValue()));
+            }
+            if (inputExtensions.getText().length() > 0) {
+                sq.addFilter(new Extension(inputExtensions.getText()));
+            }
+
 
             List<IndexDefinition> searchInIndexes = activeIndexDefinitions.stream()
                     .filter(IndexDefinition::isEnabledForSearch).toList();
 
-            ArrayList<Item> results = new ArrayList<>(searchService.search(searchInIndexes, sq));
-            searchResults.addAll(results);
+            if (searchInIndexes.size() > 0) {
+                ArrayList<Item> results = new ArrayList<>(searchService.search(searchInIndexes, sq));
+                searchResults.addAll(results);
+            }
 
         } else {
             searchResults.clear();

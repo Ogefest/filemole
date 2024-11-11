@@ -9,6 +9,14 @@ public class Path  implements  Filter {
 
     @Override
     public String getQuery() {
-        return "path LIKE '%" + q + "%'";
+
+        String[] elems = q.split(" ");
+        String result = "";
+        for (String s : elems) {
+            result += " path LIKE '%" + q + "%' AND";
+        }
+        result = result.substring(0, result.length() - 3);
+
+        return result;
     }
 }

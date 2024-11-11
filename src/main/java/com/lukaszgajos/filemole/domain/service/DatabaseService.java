@@ -52,9 +52,13 @@ public class DatabaseService {
                     update_interval INT NOT NULL
                 );
             """;
+        String createIndex = """
+                CREATE INDEX IF NOT EXISTS idx_index_item_index_id ON index_item (index_id);
+                """;
 
         stmt.execute(createTableSQL);
         stmt.execute(createIndexDefinitionTableSQL);
+        stmt.execute(createIndex);
         stmt.close();
     }
 
