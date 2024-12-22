@@ -53,6 +53,7 @@ public class SearchService {
             stmt.close();
 
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 

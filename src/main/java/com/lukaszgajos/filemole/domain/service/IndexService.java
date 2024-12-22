@@ -39,6 +39,7 @@ public class IndexService {
             return indexDefinitions;
 
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -78,6 +79,7 @@ public class IndexService {
 
             pstmt.executeUpdate();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
         long lastInsertId = 0;
@@ -91,6 +93,7 @@ public class IndexService {
             }
 
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
@@ -126,6 +129,7 @@ public class IndexService {
             db.getConnection().setAutoCommit(true);
             pstmt.close();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
         System.out.println("Index saved");

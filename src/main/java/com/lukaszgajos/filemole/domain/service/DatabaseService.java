@@ -20,6 +20,7 @@ public class DatabaseService {
             conn = DriverManager.getConnection(URL);
             createInitTables();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -72,6 +73,7 @@ public class DatabaseService {
         try (Statement stmt = conn.createStatement()) {
             stmt.executeQuery(sql);
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
