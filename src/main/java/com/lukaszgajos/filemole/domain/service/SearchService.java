@@ -3,6 +3,7 @@ package com.lukaszgajos.filemole.domain.service;
 import com.lukaszgajos.filemole.domain.entity.IndexDefinition;
 import com.lukaszgajos.filemole.domain.entity.Item;
 import com.lukaszgajos.filemole.domain.entity.SearchConfiguration;
+import com.lukaszgajos.filemole.gui.StatusInfo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,10 +43,11 @@ public class SearchService {
             while (rs.next()) {
                 Item item = new Item();
                 item.path = rs.getString("path");
+                item.archive = rs.getString("archive");
                 item.name = rs.getString("name");
                 item.size = rs.getLong("size");
-//                item.ext = rs.getString("ext");
-//                item.isDir = rs.getBoolean("isDir");
+                item.ext = rs.getString("ext");
+                item.isDir = rs.getBoolean("is_dir");
                 items.add(item);
             }
             stmt.close();
@@ -53,6 +55,8 @@ public class SearchService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
+        StatusInfo.setMessage("Found " + items.size() + " items");
 
         return items;
     }

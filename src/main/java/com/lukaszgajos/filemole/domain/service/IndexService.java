@@ -5,6 +5,7 @@ import com.lukaszgajos.filemole.domain.entity.IndexDefinition;
 import com.lukaszgajos.filemole.domain.entity.Item;
 import com.lukaszgajos.filemole.domain.process.Filesystem;
 import com.lukaszgajos.filemole.domain.process.FilesystemConfiguration;
+import com.lukaszgajos.filemole.gui.StatusInfo;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -54,6 +55,8 @@ public class IndexService {
 
     public void saveIndex(Index index) {
 
+        StatusInfo.setMessage("Saving index to db");
+
         IndexDefinition indexDefinition = index.getDefinition();
         long sizeInBytes = 0;
         long itemsCount = index.getItems().size();
@@ -92,11 +95,15 @@ public class IndexService {
         }
 
         long finalLastInsertId = lastInsertId;
-        String insert = "INSERT INTO index_item (index_id, path, name, size, ext, is_dir, last_modified, created_at) VALUES (?,?,?,?,?,?,?,?)";
+        long savedCounter = 0;
+        String insert = "INSERT INTO index_item (index_id, path, name, size, ext, is_dir, last_modified, created_at, archive) VALUES (?,?,?,?,?,?,?,?,?)";
         try (PreparedStatement pstmt = db.getConnection().prepareStatement(insert)) {
             db.getConnection().setAutoCommit(false);
 
+
             for (Item item : index.getItems()) {
+                savedCounter++;
+
                 pstmt.setLong(1, finalLastInsertId);
                 pstmt.setString(2, item.path);
                 pstmt.setString(3, item.name);
@@ -105,8 +112,14 @@ public class IndexService {
                 pstmt.setString(6, item.isDir ? "1" : "0");
                 pstmt.setLong(7, item.lastModified);
                 pstmt.setLong(8, item.createdAt);
+                pstmt.setString(9, item.archive);
                 pstmt.addBatch();
+
+                if (savedCounter % 1000 == 0) {
+                    StatusInfo.setMessage("Saving index to db " + savedCounter + " files");
+                }
             }
+            System.out.println("Save batch finished");
 
             pstmt.executeBatch();
             db.getConnection().commit();
@@ -115,12 +128,16 @@ public class IndexService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        System.out.println("Index saved");
+
+        StatusInfo.setMessage("");
     }
 
     public Index buildNewIndex(String path) {
         IndexDefinition indexDefinition = new IndexDefinition(0, path,0,0);
         FilesystemConfiguration fsconf = new FilesystemConfiguration(path);
         Filesystem fs = new Filesystem();
+        StatusInfo.setMessage("Start indexing for path " + path);
         Index newIndex = new Index(indexDefinition, fs.getItems(fsconf));
 
         return newIndex;
@@ -130,6 +147,7 @@ public class IndexService {
 
         String sql1 = "DELETE FROM index_definition WHERE id = ?";
         String sql2 = "DELETE FROM index_item WHERE index_id = ?";
+        String sql3 = "VACUUM";
 
         try {
             PreparedStatement pstmt1 = db.getConnection().prepareStatement(sql1);
@@ -141,6 +159,10 @@ public class IndexService {
             pstmt2.setInt(1, index.getId());
             pstmt2.execute();
             pstmt2.close();
+
+            Statement stmt = db.getConnection().createStatement();
+            stmt.execute(sql3);
+            stmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

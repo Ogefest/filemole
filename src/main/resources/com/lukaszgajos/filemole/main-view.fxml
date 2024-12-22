@@ -18,7 +18,7 @@
       <content>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
-                  <AnchorPane fx:id="paneSearchResult" maxHeight="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="150.0">
+                  <AnchorPane fx:id="paneSearchResult" maxHeight="1.7976931348623157E308" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="150.0">
                      <children>
                         <ListView fx:id="listViewActiveIndexes" orientation="HORIZONTAL" prefHeight="53.0" prefWidth="1278.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                         <ListView fx:id="listViewSearchResults" layoutY="62.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="62.0" />
@@ -47,6 +47,11 @@
                         </AnchorPane>
                      </children>
                   </VBox>
+                  <HBox alignment="CENTER_RIGHT" minHeight="40.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
+                     <children>
+                        <Label fx:id="labelStatusMessage" textOverrun="CENTER_ELLIPSIS" />
+                     </children>
+                  </HBox>
                </children></AnchorPane>
       </content>
     </Tab>

@@ -67,8 +67,13 @@ public class SearchResultCell extends ListCell<Item> {
         else {
             this.item = item;
 
+            if (item.archive != null) {
+                item.path = item.archive;
+            }
+
             itemName.setText(item.name);
             itemPath.setText(item.path);
+
             labelSize.setText(formatBytes(item.size));
             btnCopyPath.setOnAction(actionEvent -> {
                 Clipboard clipboard = Clipboard.getSystemClipboard();

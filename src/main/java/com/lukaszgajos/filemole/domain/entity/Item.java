@@ -10,4 +10,5 @@ public class Item {
     public long createdAt;
     public String ext;
     public boolean isDir = false;
+    public String archive;
 }

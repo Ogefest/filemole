@@ -17,18 +17,10 @@ public class Filesystem implements Indexer {
     @Override
     public List<Item> getItems(Configuration conf) {
         String start =  (((FilesystemConfiguration)conf).getStartPath());
-        List<Item> items = getItemsList(start);
-
-        return items;
-    }
-
-    private static String getFileExtension(String fileName) {
-        int dotIndex = fileName.lastIndexOf('.');
-        return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
+        return getItemsList(start);
     }
 
     private static List<Item> getItemsList(String startDirectory) {
-        List<Item> items = new ArrayList<>();
         Path startPath = Paths.get(startDirectory);
         FilesystemVisitor visitor = new FilesystemVisitor();
         try {

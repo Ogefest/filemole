@@ -32,6 +32,7 @@ public class DatabaseService {
                     index_id INTEGER,
                     name TEXT NOT NULL,
                     path TEXT NOT NULL,
+                    archive TEXT NULL,
                     size LONG NOT NULL,
                     is_dir TEXT NOT NULL,
                     ext TEXT NULL DEFAULT '',

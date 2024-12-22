@@ -11,6 +11,9 @@ import com.lukaszgajos.filemole.domain.service.IndexService;
 import com.lukaszgajos.filemole.domain.service.SearchService;
 import com.lukaszgajos.filemole.domain.service.WorkerService;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,6 +23,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.DirectoryChooser;
+import javafx.scene.control.Label;
 
 import java.awt.*;
 import java.io.File;
@@ -76,6 +80,9 @@ public class MainController {
     @FXML
     private ComboBox<String> comboSize;
 
+    @FXML
+    private Label labelStatusMessage;
+
     private LocalDateTime lastSearch = LocalDateTime.now();
 
     private DatabaseService dbService = new DatabaseService();
@@ -85,6 +92,7 @@ public class MainController {
 
     private ObservableList<Item> searchResults;
     private ObservableList<IndexDefinition> activeIndexDefinitions;
+    private StringProperty statusMessage;
 
 
     @FXML
@@ -183,10 +191,17 @@ public class MainController {
         comboSize.getItems().addAll("B", "KB", "MB", "GB", "TB");
         comboSize.setValue("MB");
 
+        statusMessage = new SimpleStringProperty();
+        statusMessage.bind(StatusInfo.infoProperty());
+        statusMessage.addListener((observableValue, s, t1) -> {
+            Platform.runLater(() -> {
+                labelStatusMessage.setText(statusMessage.getValue());
+            });
+        });
+
         Platform.runLater(() -> {
             inputSearch.requestFocus();
         });
-
 
     }
 
@@ -204,16 +219,16 @@ public class MainController {
 
             SearchConfiguration sq = new SearchConfiguration();
             sq.addFilter(new Path(search));
-            if (inputExcludePhrase.getText().length() > 0) {
+            if (!inputExcludePhrase.getText().isEmpty()) {
                 sq.addFilter(new Exclude(inputExcludePhrase.getText()));
             }
-            if (inputMinSize.getText().length() > 0) {
+            if (!inputMinSize.getText().isEmpty()) {
                 sq.addFilter(new MinSize(inputMinSize.getText(), comboSize.getValue()));
             }
-            if (inputMaxSize.getText().length() > 0) {
+            if (!inputMaxSize.getText().isEmpty()) {
                 sq.addFilter(new MaxSize(inputMaxSize.getText(), comboSize.getValue()));
             }
-            if (inputExtensions.getText().length() > 0) {
+            if (!inputExtensions.getText().isEmpty()) {
                 sq.addFilter(new Extension(inputExtensions.getText()));
             }
 
@@ -221,7 +236,7 @@ public class MainController {
             List<IndexDefinition> searchInIndexes = activeIndexDefinitions.stream()
                     .filter(IndexDefinition::isEnabledForSearch).toList();
 
-            if (searchInIndexes.size() > 0) {
+            if (!searchInIndexes.isEmpty()) {
                 ArrayList<Item> results = new ArrayList<>(searchService.search(searchInIndexes, sq));
                 searchResults.addAll(results);
             }
